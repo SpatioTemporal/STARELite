@@ -7,12 +7,16 @@ STARELite is the SQLite STARE extensions. It allows conversions of geospatial ob
 
 STARELite depends on libsqlite, libspatialite and libSTARE
 
+```bash
     c++ -g -fPIC -L/usr/local/lib/ -L/usr/lib/x86_64-linux-gnu/ -I/usr/local/include -I/usr/include/spatialite/ -std=c++11 -shared STARELite.cpp -o STARELite.so -lspatialite -lSTARE
+```
     
 
 ## Load extension
 
+```SQL
     SELECT load_extension("./STARELite");
+```
     
 equivalent to 
 
@@ -23,49 +27,65 @@ in the sqlite3 shell
 ## Use  
 
 ### STARE conversions
-From longitude, latitude and level
+From longitude, latitude, and level 
 
+```SQL
     SELECT stare_from_lonlat(5, 3.1, 2);
     SELECT name, stare_from_lonlat(longitude, latitude, 15) FROM cities;
+```
 
 #### From spatialite WKB blob (point): 
     
+```SQL
     SELECT name, stare_from_point(geometry, 15) FROM cities;
+```
 
 #### From spatilite WKB blob (polygon)
-    
+
+```SQL
     ALTER TABLE countries ADD column stare blob;
     UPDATE countries 
     SET stare=stare_from_polygon(geometry, 5);
+```
     
 #### Conversion to human readable string:
 
+```SQL
     SELECT name, decode_stareblob(stare) 
     FROM countries
+```
 
 Conversion from human readable string
 
-    SELECT decode_stareblob(encode_stareblob('[3666130979403333634, 3666130979403333634]'));
+```SQL
+    SELECT encode_stareblob('[3666130979403333634, 3666130979403333634]'));
+```
 
 #### Stare intersects 
 
+```SQL
     SELECT stare_intersects(3666130979403333634, 3666130979403333634);
 
     SELECT name, stare_intersects(2667981979956219503, stare) 
     FROM countries;
+```
     
 #### STARE join
 
+```SQL
     SELECT countries.name, countries.name 
     FROM countries, cities
     WHERE stare_intersects(countries.stare, stare_from_point(cities.geom, 15));
+```
 
 or
 
+```SQL
     SELECT countries.name, cities.name 
     FROM cities
     LEFT JOIN countries
     ON stare_intersects(countries.stare, stare_from_point(cities.geom, 15));
+```
 
 
 
