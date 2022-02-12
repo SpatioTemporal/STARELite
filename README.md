@@ -8,7 +8,7 @@ STARELite is the SQLite STARE extensions. It allows conversions of geospatial ob
 STARELite depends on libsqlite, libspatialite and libSTARE
 
 ```bash
-    c++ -g -fPIC -L/usr/local/lib/ 
+c++ -g -fPIC -L/usr/local/lib/ 
     -L/usr/lib/x86_64-linux-gnu/ 
     -I/usr/local/include 
     -I/usr/include/spatialite/ 
@@ -22,16 +22,17 @@ STARELite depends on libsqlite, libspatialite and libSTARE
 ## Load extension
 
 ```SQL
-    SELECT load_extension("./STARELite");
+SELECT load_extension("./STARELite");
 ```
     
 equivalent to 
-
-    .load ./STARELite 
+```SQL
+.load ./STARELite 
+```
 
 in the sqlite3 shell
     
-## Use  
+## Useage
 
 ### STARE conversions
 From longitude, latitude, and level 
@@ -55,7 +56,7 @@ From longitude, latitude, and level
     SET stare=stare_from_polygon(geometry, 5);
 ```
     
-#### Conversion to human readable string:
+#### Conversion between human readable strings and STAREBlobs
 
 ```SQL
     SELECT name, decode_stareblob(stare) 
@@ -95,5 +96,25 @@ or
 ```
 
 
+### Loading Data From DataFrame
+A STAREDataFrame stores collections of SIDs representing a cover as 1D numpy arrays.
+To inject those into SQLite, we have to serialize the arrays and then encode them to STARE blobs using ```encode_starebolob()```. 
+For now, we serialize the arrays to strings. E.g.:
 
+```python
+sdf['sids_serialized'] = sdf.apply(lambda row : str(list(row['sids'])), axis = 1)
+```
+
+Then we can do: 
+
+```python
+sdf.to_file('data.gpkg', driver='GPKG')
+```
+
+Finally, we can bootstrap the STAREBlobs with:
+
+```sqlite3
+SELECT load_extension("./STARELite");
+SELECT encode_stareblob(sids_serialized) FROM featuredb;
+```
 

@@ -122,12 +122,12 @@ static void stare_from_point(sqlite3_context *context, int argc, sqlite3_value *
     }
 }
 
-    
-
+ 
 /*
-** Implementation of stare_from_polygon() function.
-** Convert a gaia WKB polygon to a STARE index
+** Extract the nodes from a Gaia Polygon
 */
+
+
 
 LatLonDegrees64ValueVector polygon2points(gaiaGeomCollPtr geo_collection) {
     LatLonDegrees64ValueVector points;
@@ -164,6 +164,10 @@ LatLonDegrees64ValueVector polygon2points(gaiaGeomCollPtr geo_collection) {
     return points;}
 
 
+/*
+** Implementation of stare_from_polygon() function.
+** Convert a gaia WKB polygon to a STARE index
+*/
 
 
 static void stare_from_polygon(sqlite3_context *context, int argc, sqlite3_value **argv) {
@@ -299,7 +303,7 @@ static void encode_stareblob(sqlite3_context *context, int argc, sqlite3_value *
 
 
 /*
-** Implementation of stare_intersects() with helper functions brute_intersects and sorted intersects.
+** Implementation of stare_intersects() with helper functions brute_intersects and sorted_intersects().
 ** Returns true/false if two stare index value ranges intersect
 */
 
