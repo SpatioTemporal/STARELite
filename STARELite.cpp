@@ -319,7 +319,7 @@ static void encode_float_blob(sqlite3_context *context, int argc, sqlite3_value 
         dbls.push_back(strtod(token, &pEnd));
         token = strtok(NULL, "\n");
     }
-    
+
     // Convert vector to array
     int size = dbls.size() * sizeof(dbls[0]);
     double array[dbls.size()];
@@ -367,26 +367,10 @@ static void decode_float_blob(sqlite3_context *context, int argc, sqlite3_value 
     sqlite3_result_text(context, result_string, str.length(), SQLITE_TRANSIENT);
 }
 
-/*https://www.sqlite.org/appfunc.html
-Example: 
-typedef struct CountCtx CountCtx;
-struct CountCtx {
-  i64 n;
-};
-static void countStep(sqlite3_context *context, int argc, sqlite3_value **argv){
-  CountCtx *p;
-  p = sqlite3_aggregate_context(context, sizeof(*p));
-  if( (argc==0 || SQLITE_NULL!=sqlite3_value_type(argv[0])) && p ){
-    p->n++;
-  }
-}   
-static void countFinalize(sqlite3_context *context){
-  CountCtx *p;
-  p = sqlite3_aggregate_context(context, 0);
-  sqlite3_result_int64(context, p ? p->n : 0);
-}
-*/
-/* An Aggregate function that is used to sum up all ellements of all BLOB array tuples */
+/*  */
+/* An Aggregate function that is used to sum up all ellements of 
+    all BLOB array tuples. 
+    (for how to implement see: https://www.sqlite.org/appfunc.html) */
 typedef struct Sum_BLOB_Array Sum_BLOB_Array; 
 struct Sum_BLOB_Array {
     double sum;
@@ -607,39 +591,10 @@ extern "C" {
         rc = sqlite3_create_function(db, "stare_intersects", 2,
                                      SQLITE_UTF8|SQLITE_DETERMINISTIC,
                                      0, stare_intersects, 0, 0);
-        /* Aggregate function */
+        /* Aggregate function: https://www.sqlite.org/capi3.html */
         rc = sqlite3_create_function(db, "sum_blob_array", 1,
                                      SQLITE_UTF8|SQLITE_DETERMINISTIC,
-                                     0, 0, sum_blob_array_Step, sum_blob_array_Final);
-/*
-https://www.sqlite.org/capi3.html:
-   typedef struct sqlite3_value sqlite3_value;
-   int sqlite3_create_function(
-     sqlite3 *,
-     const char *zFunctionName,
-     int nArg,
-     int eTextRep,
-     void*,
-     void (*xFunc)(sqlite3_context*,int,sqlite3_value**),
-     void (*xStep)(sqlite3_context*,int,sqlite3_value**),
-     void (*xFinal)(sqlite3_context*)
-   );
-   int sqlite3_create_function16(
-     sqlite3*,
-     const void *zFunctionName,
-     int nArg,
-     int eTextRep,
-     void*,
-     void (*xFunc)(sqlite3_context*,int,sqlite3_value**),
-     void (*xStep)(sqlite3_context*,int,sqlite3_value**),
-     void (*xFinal)(sqlite3_context*)
-   );
-   #define SQLITE_UTF8     1
-   #define SQLITE_UTF16    2
-   #define SQLITE_UTF16BE  3
-   #define SQLITE_UTF16LE  4
-   #define SQLITE_ANY      5
-*/                
+                                     0, 0, sum_blob_array_Step, sum_blob_array_Final);            
         return rc;
     }
 }
