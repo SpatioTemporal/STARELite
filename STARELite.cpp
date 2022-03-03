@@ -316,7 +316,7 @@ static void encode_float_blob(sqlite3_context *context, int argc, sqlite3_value 
     char* pEnd;
     std::vector<double> dbls;
     while( token != NULL ) {
-        dbls.push_back(strtoll(token, &pEnd, 10));
+        dbls.push_back(strtod(token, &pEnd));
         token = strtok(NULL, "\n");
     }
     
@@ -581,35 +581,35 @@ extern "C" {
         SQLITE_EXTENSION_INIT2(pApi);
         (void)pzErrMsg;  /* Unused parameter */
         rc = sqlite3_create_function(db, "stare_from_lonlat", 3,
-                                     SQLITE_UTF8|SQLITE_INNOCUOUS|SQLITE_DETERMINISTIC,
+                                     SQLITE_UTF8|SQLITE_DETERMINISTIC,
                                     0, stare_from_lonlat, 0, 0);        
         rc = sqlite3_create_function(db, "stare_from_point", 2,
-                                     SQLITE_UTF8|SQLITE_INNOCUOUS|SQLITE_DETERMINISTIC,
+                                     SQLITE_UTF8|SQLITE_DETERMINISTIC,
                                      0, stare_from_point, 0, 0);
         rc = sqlite3_create_function(db, "stare_from_polygon", 2,
-                                     SQLITE_UTF8|SQLITE_INNOCUOUS|SQLITE_DETERMINISTIC,
+                                     SQLITE_UTF8|SQLITE_DETERMINISTIC,
                                      0, stare_from_polygon, 0, 0);
         rc = sqlite3_create_function(db, "decode_stareblob", 1,
-                                     SQLITE_UTF8|SQLITE_INNOCUOUS|SQLITE_DETERMINISTIC,
+                                     SQLITE_UTF8|SQLITE_DETERMINISTIC,
                                      0, decode_stareblob, 0, 0);
         rc = sqlite3_create_function(db, "encode_stareblob", 1,
-                                     SQLITE_UTF8|SQLITE_INNOCUOUS|SQLITE_DETERMINISTIC,
+                                     SQLITE_UTF8|SQLITE_DETERMINISTIC,
                                      0, encode_stareblob, 0, 0);
         rc = sqlite3_create_function(db, "decode_float_blob", 1,
-                                     SQLITE_UTF8|SQLITE_INNOCUOUS|SQLITE_DETERMINISTIC,
+                                     SQLITE_UTF8|SQLITE_DETERMINISTIC,
                                      0, decode_float_blob, 0, 0);
         rc = sqlite3_create_function(db, "encode_float_blob", 1,
-                                     SQLITE_UTF8|SQLITE_INNOCUOUS|SQLITE_DETERMINISTIC,
+                                     SQLITE_UTF8|SQLITE_DETERMINISTIC,
                                      0, encode_float_blob, 0, 0);
         rc = sqlite3_create_function(db, "sum_blob_all_element_array", 1,
-                                     SQLITE_UTF8|SQLITE_INNOCUOUS|SQLITE_DETERMINISTIC,
+                                     SQLITE_UTF8|SQLITE_DETERMINISTIC,
                                      0, sum_blob_all_element_array, 0, 0);
         rc = sqlite3_create_function(db, "stare_intersects", 2,
-                                     SQLITE_UTF8|SQLITE_INNOCUOUS|SQLITE_DETERMINISTIC,
+                                     SQLITE_UTF8|SQLITE_DETERMINISTIC,
                                      0, stare_intersects, 0, 0);
         /* Aggregate function */
         rc = sqlite3_create_function(db, "sum_blob_array", 1,
-                                     SQLITE_UTF8|SQLITE_INNOCUOUS|SQLITE_DETERMINISTIC,
+                                     SQLITE_UTF8|SQLITE_DETERMINISTIC,
                                      0, 0, sum_blob_array_Step, sum_blob_array_Final);
 /*
 https://www.sqlite.org/capi3.html:
