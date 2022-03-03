@@ -355,9 +355,11 @@ static void decode_float_blob(sqlite3_context *context, int argc, sqlite3_value 
     
     std::string str;
     str += "[";
-    for (double value: dbls) {
-        str += std::to_string(value);        
-        str += ", ";
+    for (int i = 0; i < dbls.size(); i++){
+        str += std::to_string(dbls[i]);
+        if(i < dbls.size() - 1){
+            str += ", ";
+        }
     }
     str += "]";
         
@@ -367,7 +369,6 @@ static void decode_float_blob(sqlite3_context *context, int argc, sqlite3_value 
     sqlite3_result_text(context, result_string, str.length(), SQLITE_TRANSIENT);
 }
 
-/*  */
 /* An Aggregate function that is used to sum up all ellements of 
     all BLOB array tuples. 
     (for how to implement see: https://www.sqlite.org/appfunc.html) */
