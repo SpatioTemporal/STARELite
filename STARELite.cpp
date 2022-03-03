@@ -390,10 +390,10 @@ static void countFinalize(sqlite3_context *context){
 typedef struct Sum_BLOB_Array Sum_BLOB_Array; 
 struct Sum_BLOB_Array {
     double sum;
-}
+};
 static void sum_blob_array_Step(sqlite3_context *context, int argc, sqlite3_value **argv){
     Sum_BLOB_Array *p;
-    p = sqlite3_aggregate_context(context, sizeof(*p));
+    p = (Sum_BLOB_Array*)sqlite3_aggregate_context(context, sizeof(*p));
 
     unsigned char *p_blob;
     int n_bytes;
@@ -414,9 +414,13 @@ static void sum_blob_array_Step(sqlite3_context *context, int argc, sqlite3_valu
 
 static void sum_blob_array_Final(sqlite3_context *context){
     Sum_BLOB_Array *p;
-    p = sqlite3_aggregate_context(context, sizeof(*p));
+    p = (Sum_BLOB_Array*)sqlite3_aggregate_context(context, sizeof(*p));
     std:string str_sum = std::to_string(p->sum);
-    sqlite3_result_text(context, str_sum, str_sum.length(), SQLITE_TRANSIENT);
+
+    char result_string[str_sum.length()]; 
+    strcpy(result_string, str_sum.c_str());
+
+    sqlite3_result_text(context, result_string, str_sum.length(), SQLITE_TRANSIENT);
     //sqlite3_result_double(context, p->sum); if a double is expected
 }
 
@@ -438,8 +442,11 @@ static void sum_blob_all_element_array(sqlite3_context *context, int argc, sqlit
         dbl_sum += value;
     }
     std::string str_sum = std::to_string(dbl_sum);
+
+    char result_string[str_sum.length()]; 
+    strcpy(result_string, str_sum.c_str());
     
-    sqlite3_result_text(context, str_sum, str_sum.length(), SQLITE_TRANSIENT);
+    sqlite3_result_text(context, result_string, str_sum.length(), SQLITE_TRANSIENT);
     //sqlite3_result_double(context, dbl_sum);//If we want to return a double instead of string
 }
 
