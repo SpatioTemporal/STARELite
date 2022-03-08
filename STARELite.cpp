@@ -286,7 +286,7 @@ static void encode_stareblob(sqlite3_context *context, int argc, sqlite3_value *
     std::vector<int64_t> sisvs;
     while( token != NULL ) {
         sisvs.push_back(strtoll(token, &pEnd, 10));
-        token = strtok(NULL, "\n");
+        token = strtok(NULL, "\n");//should be token = strtok(NULL, ",")
     }
     
     // Convert vector to array
@@ -317,13 +317,17 @@ static void encode_float_blob(sqlite3_context *context, int argc, sqlite3_value 
     std::vector<double> dbls;
     while( token != NULL ) {
         dbls.push_back(strtod(token, &pEnd));
-        token = strtok(NULL, "\n");
+        token = strtok(NULL, ",");
     }
 
     // Convert vector to array
     int size = dbls.size() * sizeof(dbls[0]);
     double array[dbls.size()];
     int i = 0;
+    /*for (int i = 0; i < dbls.size(); i++){
+        array[i] = dbls[i];
+        std::cout<<dbls[i]<<endl;
+    }*/
     for (double val: dbls){
         array[i] = val;
         i ++;
