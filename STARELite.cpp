@@ -286,7 +286,7 @@ static void encode_stareblob(sqlite3_context *context, int argc, sqlite3_value *
     std::vector<int64_t> sisvs;
     while( token != NULL ) {
         sisvs.push_back(strtoll(token, &pEnd, 10));
-        token = strtok(NULL, "\n");//should be token = strtok(NULL, ",")
+        token = strtok(NULL, ",");
     }
     
     // Convert vector to array
@@ -324,10 +324,6 @@ static void encode_float_blob(sqlite3_context *context, int argc, sqlite3_value 
     int size = dbls.size() * sizeof(dbls[0]);
     double array[dbls.size()];
     int i = 0;
-    /*for (int i = 0; i < dbls.size(); i++){
-        array[i] = dbls[i];
-        std::cout<<dbls[i]<<endl;
-    }*/
     for (double val: dbls){
         array[i] = val;
         i ++;
@@ -372,6 +368,79 @@ static void decode_float_blob(sqlite3_context *context, int argc, sqlite3_value 
     
     sqlite3_result_text(context, result_string, str.length(), SQLITE_TRANSIENT);
 }
+
+
+static void encode_int_blob(sqlite3_context *context, int argc, sqlite3_value **argv) {
+    
+    if (sqlite3_value_type(argv[0]) != SQLITE_TEXT) {
+	  sqlite3_result_null(context);
+	  return;
+    }
+    
+    char *string = reinterpret_cast<char*>(const_cast<unsigned char*>(sqlite3_value_text(argv[0])));
+    removeChar(string, '[');
+    removeChar(string, ']');
+    removeChar(string, ' ');
+
+    char * token = strtok(string, ",");
+    char* pEnd;
+    std::vector<int> ints;
+    while( token != NULL ) {
+        ints.push_back(strtod(token, &pEnd));
+        token = strtok(NULL, ",");
+    }
+
+    // Convert vector to array
+    int size = ints.size() * sizeof(ints[0]);
+    double array[ints.size()];
+    int i = 0;
+    for (int val: ints){
+        array[i] = val;
+        i ++;
+    }
+    sqlite3_result_blob64(context, &array, size, SQLITE_TRANSIENT);      
+}
+
+
+std::vector<int> blob2ints(unsigned char *p_blob, int n_bytes) {
+    std::vector<int> ints;    
+    int size = sizeof(ints);
+    for (int i=0; i<n_bytes; i+=size) {        
+        ints.push_back(gaiaImport64(p_blob + i, 1, 1));
+    }
+    return ints;
+}
+
+
+static void decode_int_blob(sqlite3_context *context, int argc, sqlite3_value **argv) {
+    unsigned char *p_blob;
+    int n_bytes;
+    
+    if (sqlite3_value_type(argv[0]) != SQLITE_BLOB) {
+	  sqlite3_result_null(context);
+	  return;
+    }
+        
+    p_blob = (unsigned char *) sqlite3_value_blob(argv[0]);
+    n_bytes = sqlite3_value_bytes(argv[0]);
+    std::vector<int> ints= blob2ints(p_blob, n_bytes);
+    
+    std::string str;
+    str += "[";
+    for (int i = 0; i < ints.size(); i++){
+        str += std::to_string(ints[i]);
+        if(i < ints.size() - 1){
+            str += ", ";
+        }
+    }
+    str += "]";
+        
+    char result_string[str.length()]; 
+    strcpy(result_string, str.c_str());
+    
+    sqlite3_result_text(context, result_string, str.length(), SQLITE_TRANSIENT);
+}
+
 
 /* An Aggregate function that is used to sum up all ellements of 
     all BLOB array tuples. 
@@ -590,6 +659,12 @@ extern "C" {
         rc = sqlite3_create_function(db, "encode_float_blob", 1,
                                      SQLITE_UTF8|SQLITE_DETERMINISTIC,
                                      0, encode_float_blob, 0, 0);
+        rc = sqlite3_create_function(db, "decode_int_blob", 1,
+                                     SQLITE_UTF8|SQLITE_DETERMINISTIC,
+                                     0, decode_int_blob, 0, 0);
+        rc = sqlite3_create_function(db, "encode_int_blob", 1,
+                                     SQLITE_UTF8|SQLITE_DETERMINISTIC,
+                                     0, encode_int_blob, 0, 0);
         rc = sqlite3_create_function(db, "sum_blob_all_element_array", 1,
                                      SQLITE_UTF8|SQLITE_DETERMINISTIC,
                                      0, sum_blob_all_element_array, 0, 0);

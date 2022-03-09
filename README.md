@@ -31,6 +31,11 @@ equivalent to
 ```
 
 in the sqlite3 shell
+
+For some functions, the spatialite extension needs to be loaded as well:
+```sql
+SELECT load_extension("mod_spatialite");
+```
     
 ## Useage
 
@@ -111,10 +116,33 @@ Then we can do:
 sdf.to_file('data.gpkg', driver='GPKG')
 ```
 
-Finally, we can bootstrap the STAREBlobs with:
+Finally, we can bootstrap the STAREBlobs with
 
-```sqlite3
+```sql
 SELECT load_extension("./STARELite");
 SELECT encode_stareblob(sids_serialized) FROM featuredb;
 ```
 
+
+#### Bootstrap a database:
+```sql
+ALTER TABLE featuredb ADD COLUMN sids BLOB;
+UPDATE featuredb set sids = encode_stareblob(sids_s);
+```
+
+```sql
+ALTER TABLE featuredb ADD COLUMN precip BLOB;
+UPDATE featuredb set precip = encode_float_blob(precip_s);
+```
+
+
+```sql
+ALTER TABLE featuredb ADD COLUMN area BLOB;
+UPDATE featuredb set area = encode_float_blob(areas_s);
+```
+
+
+```sql
+ALTER TABLE featuredb ADD COLUMN precip BLOB;
+UPDATE featuredb set precip = encode_float_blob(precip_s);
+```
